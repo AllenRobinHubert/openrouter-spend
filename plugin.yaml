@@ -1,0 +1,43 @@
+name: openrouter-spend
+version: "0.4.0"
+description: OpenRouter-reported API-key spend and a local Hermes request ledger
+author: Allen Robin Hubert
+license: MIT
+provides_hooks:
+  - pre_api_request
+  - api_request_error
+  - post_auxiliary_call
+  - post_tool_call
+config_schema:
+  api_key_env:
+    type: str
+    default: OPENROUTER_API_KEY
+    description: Name of the environment variable containing the OpenRouter key (never the key itself)
+  cache_seconds:
+    type: int
+    default: 30
+    description: Seconds to reuse a key-spend response
+  timeout_seconds:
+    type: int
+    default: 8
+    description: Timeout for read-only OpenRouter accounting requests
+  usd_inr_rate:
+    type: str
+    default: ""
+    description: Optional manual INR per USD rate; empty fetches the daily public reference rate
+  fx_cache_seconds:
+    type: int
+    default: 43200
+    description: Seconds to cache the public USD/INR reference rate
+  comparison_label:
+    type: str
+    default: Codex
+    description: Label for your monthly comparison; the default is an illustrative personal baseline
+  comparison_usd:
+    type: str
+    default: "110"
+    description: Positive USD monthly comparison amount; set your own subscription price or budget
+  comparison_inr:
+    type: str
+    default: "10699"
+    description: Non-negative INR comparison amount; empty converts the USD baseline using the current rate

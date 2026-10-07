@@ -1,0 +1,11 @@
+{
+  "name": "openrouter-spend",
+  "version": "0.4.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "author": "Allen Robin Hubert",
+  "scripts": {
+    "test": "node tests/test_ui.cjs"
+  }
+}
