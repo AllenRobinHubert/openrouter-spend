@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.1
+
+- Defer state access until the first callback so registration passes the isolated capability probe.
+- Declare the existing llm_execution middleware and OpenRouter key requirement for catalog validation.
+- Add minimum Hermes compatibility metadata and explicit data-access disclosures.
+
 ## 0.4.0
 
 - Public source package with MIT license, installation and accounting documentation.

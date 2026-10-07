@@ -1,8 +1,17 @@
 name: openrouter-spend
-version: "0.4.0"
+version: "0.4.1"
 description: OpenRouter-reported API-key spend and a local Hermes request ledger
 author: Allen Robin Hubert
 license: MIT
+requires_hermes: ">=0.21.5"
+provides_tools: []
+provides_middleware:
+  - llm_execution
+requires_env:
+  - name: OPENROUTER_API_KEY
+    description: Your OpenRouter key for read-only accounting (or configure api_key_env for an existing key variable)
+    secret: true
+    url: https://openrouter.ai/settings/keys
 provides_hooks:
   - pre_api_request
   - api_request_error

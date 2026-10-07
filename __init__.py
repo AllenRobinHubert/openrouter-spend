@@ -1,16 +1,33 @@
 """Hermes registration. No networking, model calls, or prompt changes at load time."""
 from .spend import SpendPlugin
+from threading import Lock
 
 
 def register(ctx):
-    plugin = SpendPlugin(ctx.state.data_dir, ctx.get_config, profile=ctx.profile_name)
-    ctx.register_middleware("llm_execution", plugin.on_execution)
-    ctx.register_hook("pre_api_request", plugin.on_pre_request)
-    ctx.register_hook("api_request_error", plugin.on_error)
-    ctx.register_hook("post_auxiliary_call", plugin.on_auxiliary)
-    ctx.register_hook("post_tool_call", plugin.on_image_tool)
+    # Registration is declarative: open the ledger only when a scoped callback runs.
+    plugin = None
+    lock = Lock()
+
+    def get_plugin():
+        nonlocal plugin
+        with lock:
+            if plugin is None:
+                plugin = SpendPlugin(ctx.state.data_dir, ctx.get_config, profile=ctx.profile_name)
+            return plugin
+
+    def callback(method):
+        def invoke(*args, **kwargs):
+            return getattr(get_plugin(), method)(*args, **kwargs)
+        return invoke
+
+    command = callback("command")
+    ctx.register_middleware("llm_execution", callback("on_execution"))
+    ctx.register_hook("pre_api_request", callback("on_pre_request"))
+    ctx.register_hook("api_request_error", callback("on_error"))
+    ctx.register_hook("post_auxiliary_call", callback("on_auxiliary"))
+    ctx.register_hook("post_tool_call", callback("on_image_tool"))
     ctx.register_command(
-        "spend", plugin.command,
+        "spend", command,
         description="OpenRouter API-key spend and Hermes request costs",
         args_hint="[today|week|month|total|refresh|ledger|models|status|reconcile|help]",
     )
@@ -19,7 +36,7 @@ def register(ctx):
         parser.add_argument("args", nargs="*", help="Same options as /spend")
 
     def handle(args):
-        result = plugin.command(" ".join(args.args))
+        result = command(" ".join(args.args))
         print(result)
         return 1 if result.startswith("Error:") else 0
 

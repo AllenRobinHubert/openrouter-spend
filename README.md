@@ -1,10 +1,12 @@
 # OpenRouter Spend for Hermes
 
-An independent Hermes plugin showing OpenRouter API-key spend in USD and estimated INR, with a local request ledger and a desktop status-bar popup. Version **0.4.0** · MIT license.
+An independent Hermes plugin showing OpenRouter API-key spend in USD and estimated INR, with a local request ledger and a desktop status-bar popup. Version **0.4.1** · MIT license.
 
 The closed status bar shows total key spend and **This chat**. The popup adds daily, weekly and monthly totals, chat cost, a configurable monthly comparison, and profile/model tables. Both tables keep unassigned key spend in their existing **Other** row.
 
 ## Install
+
+Requires Hermes **0.21.5 or newer** with the Desktop plugin SDK.
 
 Requires Hermes with agent plugins, the desktop plugin SDK, dashboard plugin API routes, and the `llm_execution` middleware. This-chat cost additionally requires `host.state.focusedStoredSessionId`. Older desktop builds show that cost as unavailable. This package needs no frontend build and no additional Python dependencies beyond Hermes itself.
 
@@ -62,7 +64,7 @@ The shipped comparison defaults (`Codex`, `$110`, `₹10,699`) preserve the orig
 
 ## Privacy and network access
 
-The backend sends the selected key only to OpenRouter's read-only accounting endpoints. It also contacts `api.frankfurter.dev` for public USD/INR reference rates unless you set a manual rate. The desktop UI never receives the key. Local SQLite stores request IDs, session IDs, models, profiles, key fingerprints, numeric usage, costs and cached totals; it stores no prompts or message text. History readers select accounting metadata only. Share this source package, **not your installed plugin-data directory**.
+The backend sends the selected key only to OpenRouter's read-only accounting endpoints. It also contacts `api.frankfurter.dev` for public USD/INR reference rates unless you set a manual rate. The desktop UI never receives the key. Local SQLite stores request IDs, session IDs, models, profiles, key fingerprints, numeric usage, costs and cached totals; it stores no prompts or message text. History readers select accounting metadata only from the local default profile and named profile session databases and OpenRouter Spend ledgers. The plugin reads these files in read-only mode for aggregation; it does not modify Hermes history. The local manual-usage actions write only to this plugin’s ledger. It does not access browser profiles, vendor CLI credentials, or other tools’ login stores. It launches no shell commands or background processes and sends no telemetry. Share this source package, **not your installed plugin-data directory**.
 
 ## Commands and development
 
@@ -71,11 +73,18 @@ The backend sends the selected key only to OpenRouter's read-only accounting end
 ```sh
 python3 -m unittest discover -s tests -v
 node tests/test_ui.cjs
+hermes plugins validate . --install-deps
 hermes plugins doctor . --ci
 ```
 
 Backend tests run with Python's standard library; the UI harness uses Node.js built-ins and mocks the SDK. Hermes supplies React, its plugin SDK, FastAPI and Pydantic at runtime. No npm install or compilation is needed.
 
 Package layout: `plugin.yaml` and `__init__.py` register the agent; `spend.py` records costs; `analytics.py` reads history; `dashboard/` exposes profile-scoped routes; `desktop/plugin.js` renders the status bar.
+
+## Preview
+
+![Status-bar popup and chip rendered with demo data](docs/statusbar.png)
+
+The preview uses synthetic values rendered from the plugin components with a mocked SDK popover frame; it contains no user configuration or spend history.
 
 See [CHANGELOG.md](CHANGELOG.md). This is a community plugin, independently maintained and unaffiliated with Hermes, OpenRouter or OpenAI.
